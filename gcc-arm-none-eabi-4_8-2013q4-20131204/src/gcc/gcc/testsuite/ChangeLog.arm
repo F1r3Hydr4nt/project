@@ -1,0 +1,34 @@
+2013-11-28  Bin Cheng  <bin.cheng@arm.com>
+
+	Backport mainline r200103
+	2013-06-15  Jeff Law  <law@redhat.com>(missing)
+
+	* gcc.dg/tree-ssa/coalesce-1.c: New test.
+
+2013-11-27  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r205391
+	2013-11-26  Terry Guo  <terry.guo@arm.com>
+
+	* gcc.target/arm/thumb1-pic-high-reg.c: New case.
+	* gcc.target/arm/thumb1-pic-single-base.c: New case.
+
+2013-11-26  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r205342
+	2013-11-25  Terry Guo  <terry.guo@arm.com>
+
+	* gcc.target/arm/thumb2-slow-flash-data.c: New.
+
+2013-11-14  Joey Ye  <joey.ye@arm.com>
+
+	Backport mainline r204778
+	* gcc.dg/tree-ssa/vrp47.c: Disable for cortex_m.
+
+2013-08-05  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline r197956
+	2013-04-15  Joey Ye  <joey.ye@arm.com>
+
+	* gcc.target/arm/thumb1-far-jump-1.c: New test.
+	* gcc.target/arm/thumb1-far-jump-2.c: New test.

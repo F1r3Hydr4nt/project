@@ -1,0 +1,208 @@
+2013-11-29  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r205484
+	2013-11-28  Terry Guo  <terry.guo@arm.com>
+
+	* config/arm/arm.c (v7m_extra_costs): New table.
+	(arm_v7m_tune): Use it.
+
+2013-11-28  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r198084
+	2013-04-19  Terry Guo  <terry.guo@arm.com>
+
+	* config/arm/cortex-m4-fpu.md (cortex_m4_v): Delete cpu unit.
+	Replace with ...
+	(cortex_m4_v_a,  cortex_m4_v_b): ... new cpu units.
+	(cortex_m4_v, cortex_m4_exa_va, cortex_m4_exb_vb): New reservations.
+	(cortex_m4_fmacs): Use new reservations.
+	(cortex_m4_f_load, cortex_m4_f_store): Likewise.
+
+2013-11-28  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r198021
+	2013-04-17  Terry Guo  <terry.guo@arm.com>
+
+	* config/arm/cortex-m4.md: Add a new bypass.
+
+2013-11-28  Bin Cheng  <bin.cheng@arm.com>
+
+	Backport mainline r200103
+	2013-06-15  Jeff Law  <law@redhat.com>(missing)
+
+	* gimple.h (gimple_can_coalesce_p): Prototype.
+	* tree-ssa-coalesce.c (gimple_can_coalesce_p): New function.
+	(create_outofssa_var_map, coalesce_partitions): Use it.
+	* tree-ssa-uncprop.c (uncprop_into_successor_phis): Similarly.
+	* tree-ssa-live.c (var_map_base_init): Use TYPE_CANONICAL
+	if it's available.
+
+2013-11-27  Joey Ye  <joey.ye@arm.com>
+
+	Backport mainline r198980
+	2013-05-16  Steve Ellcey  <sellcey@imgtec.com>
+
+	* cfghooks.c (copy_bbs): Add update_dominance argument.
+	* cfghooks.h (copy_bbs): Update prototype.
+	* tree-cfg.c (gimple_duplicate_sese_region):
+	Add update_dominance argument.
+	* tree-flow.h (gimple_duplicate_sese_region): Update prototype.
+	* tree-ssa-loop-ch.c (copy_loop_headers): Update
+	gimple_duplicate_sese_region call.
+	* tree-vect-loop-manip.c (slpeel_tree_duplicate_loop_to_edge_cfg):
+	Update copy_bbs call.
+	* cfgloopmanip.c (duplicate_loop_to_header_edge): Ditto.
+	* trans-mem.c (ipa_uninstrument_transaction): Ditto.
+
+2013-11-27  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r205391
+	2013-11-26  Terry Guo  <terry.guo@arm.com>
+
+	* config/arm/arm.c (require_pic_register): Handle high pic base
+	register for thumb-1.
+	(arm_load_pic_register): Also initialize high pic base register.
+	* doc/invoke.texi: Update documentation for option -mpic-register.
+
+2013-11-26  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline
+	2013-11-19  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/arm/arm.c (arm_new_rtx_costs):
+	Handle narrow mode add-shifts properly.
+	* config/arm/arm-common.c (arm_rtx_shift_left_p): Remove static.
+	* config/arm/arm-common-protos.h (arm_rtx_shift_left_p):
+	Declare extern.
+
+	2013-11-13  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/arm/arm.c: Include aarch-cost-tables.h.
+	(generic_extra_costs): Move from here...
+	* config/arm/aarch-cost-tables.h: ... To here.  New file.
+
+	2013-11-11  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/arm/arm.c (arm_new_rtx_costs): Return after handling
+	comparisons.
+
+	2013-11-08  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+
+	* config/arm/arm.c (arm_new_rtx_costs): Break after handling
+	comparisons.
+
+	2013-10-03  Kyrylo Tkachov  <kyrylo.tkachov@arm.com>
+		    Richard Earnshaw  <richard.earnshaw@arm.com>
+
+	* config/arm/aarch-common-protos.h (struct alu_cost_table): New.
+	(struct mult_cost_table): Likewise.
+	(struct mem_cost_table): Likewise.
+	(struct fp_cost_table): Likewise.
+	(struct vector_cost_table): Likewise.
+	(cpu_cost_table): Likewise.
+	* config/arm/arm.opt (mold-rts-costs): New option.
+	(mnew-generic-costs): Likewise.
+	* config/arm/arm.c (generic_extra_costs): New table.
+	(cortexa15_extra_costs): Likewise.
+	(arm_slowmul_tune): Use NULL as new costs.
+	(arm_fastmul_tune): Likewise.
+	(arm_strongarm_tune): Likewise.
+	(arm_xscale_tune): Likewise.
+	(arm_9e_tune): Likewise.
+	(arm_v6t2_tune): Likewise.
+	(arm_cortex_a5_tune): Likewise.
+	(arm_cortex_a9_tune): Likewise.
+	(arm_v6m_tune): Likewise.
+	(arm_fa726te_tune): Likewise.
+	(arm_cortex_a15_tune): Use cortex15_extra_costs.
+	(arm_cortex_tune): Use generict_extra_costs.
+	(shifter_op_p): New function.
+	(arm_unspec_cost): Likewise.
+	(LIBCALL_COST): Define.
+	(arm_new_rtx_costs): New function.
+	(arm_rtx_costs): Use arm_new_rtx_costs when core-specific
+	table is available. Use old costs otherwise unless mnew-generic-costs
+	is specified.
+	* config/arm/arm-protos.h (tune_params): Add insn_extra_cost field.
+	(cpu_cost_table): Declare.
+
+2013-11-26  Terry Guo  <terry.guo@arm.com>
+
+	Backport mainline r205342
+	2013-11-25  Terry Guo  <terry.guo@arm.com>
+
+	* doc/invoke.texi (-mslow-flash-data): Document new option.
+	* config/arm/arm.opt (mslow-flash-data): New option.
+	* config/arm/arm-protos.h (arm_max_const_double_inline_cost): Declare
+	it.
+	* config/arm/arm.h (TARGET_USE_MOVT): Always true when literal pools
+	are disabled.
+	(arm_disable_literal_pool): Declare it.
+	* config/arm/arm.c (arm_disable_literal_pool): New variable.
+	(arm_option_override): Handle new option.
+	(thumb2_legitimate_address_p): Don't allow symbol references when
+	literal pools are disabled.
+	(arm_max_const_double_inline_cost): New function.
+	* config/arm/arm.md (types.md): Include it before ...
+	(use_literal_pool): New attribute.
+	(enabled): Use new attribute.
+	(split pattern): Replace symbol+offset with MOVW/MOVT.
+
+2013-11-19  Joey Ye  <joey.ye@arm.com>
+
+	Backport mainline r205016
+	2013-11-19  Joey Ye  <joey.ye@arm.com>
+
+	* config/arm/arm.opt (-marm-pic-data-is-text-relative): New option.
+	* doc/invoke.texi (-marm-pic-data-is-text-relative): Documentation
+	for new option.
+	* config/arm/arm.c (arm_option_override): By default disable
+	-marm-pic-data-is-text-relative.
+	(legitimize_pic_address): Use arm_pic_data_is_text_relative.
+	(arm_assemble_integer): Likewise.
+	* config/arm/arm.h (TARGET_DEFAULT_PIC_DATA_IS_TEXT_RELATIVE):
+	New macro to initialize -marm-pic-data-is-text-relative.
+
+2013-11-14  Joey Ye  <joey.ye@arm.com>
+
+	Backport mainline r204778
+	2013-11-14  Julian Brown  <julian@codesourcery.com>
+	Joey Ye  <joey.ye@arm.com>
+
+	* config/arm/arm.c (arm_cortex_m_branch_cost): New.
+	(arm_v7m_tune): New.
+	* config/arm/arm-cores.def (cortex-m4, cortex-m3):
+	Use arm_v7m_tune.
+
+2013-08-29  Zhenqiang Chen  <zhenqiang.chen@arm.com>
+
+	* config/arm/arm.c (arm_option_override): Disable loop2_invariant
+	pass when optimize_size and ira-loop-pressure is not enabled.
+
+2013-08-05  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline r197956
+	2013-04-15  Joey Ye  <joey.ye@arm.com>
+
+	* config/arm/arm.c (thumb1_final_prescan_insn): Assert lr save
+	for real far jump.
+	(thumb_far_jump_used_p): Count instruction size and set
+	far_jump_used.
+
+2013-08-05  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline r197153
+	2013-03-27  Terry Guo  <terry.guo@arm.com>
+
+	* config/arm/arm-cores.def: Added core cortex-r7.
+	* config/arm/arm-tune.md: Regenerated.
+	* config/arm/arm-tables.opt: Regenerated.
+	* doc/invoke.texi: Added entry for core cortex-r7.
+
+2013-07-24  Terry Guo  <terry.guo@arm.com>
+
+	* configure.ac (with_multilib_list): Export its value.
+	* Makefile.in (with_multilib_list): Import it from configure files.
+	* configure: Regenerated.
+	* config/arm/t-mlibs: New files to define multilibs.
+	* config.gcc: Use above multilib fragment.

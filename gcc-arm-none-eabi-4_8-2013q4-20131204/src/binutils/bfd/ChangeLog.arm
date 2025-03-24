@@ -1,0 +1,18 @@
+2013-07-30  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline
+	2013-07-18  Terry Guo  <terry.guo@arm.com>
+
+	* elf32-arm.c (arm_type_of_stub): Don't use ST_BRANCH_TO_ARM for
+	thumb only targets.
+	(elf32_arm_final_link_relocate): Likewise.
+
+2013-07-24  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline
+	2012-10-13  H.J. Lu  <hongjiu.lu@intel.com>
+
+	* Makefile.am (LIBDL): Replace -ldl with @lt_cv_dlopen_libs@.
+	* configure.in (lt_cv_dlopen_libs): AC_SUBST.
+	* Makefile.in: Regenerated.
+	* configure: Likewise.

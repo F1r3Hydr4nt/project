@@ -1,0 +1,588 @@
+\input texinfo @c -*-texinfo-*-
+@c %**start of header
+@c makeinfo and texinfo.tex ignore all text before @setfilename.
+@c
+@c Ordinarily, the setfilename argument ends with .info.  But
+@c texinfo.info-13 is too long for 14-character filesystems.
+@setfilename how-to-build-toolchain.info
+@include version.texi
+@settitle How To Build Toolchain
+@paragraphindent asis
+@c %**end of header
+
+@copying
+Copyright @copyright{} 2012-@value{CURRENT_YEAR} ARM Ltd.
+@end copying
+
+@finalout
+@smallbook
+
+@titlepage
+@title The Build Process
+@subtitle of @value{VERSION_PACKAGE}
+@subtitle @value{CURRENT_YEAR}-@value{CURRENT_MONTH}
+
+@c The following two commands start the copyright page
+@page
+@vskip 0pt plus 1filll
+@insertcopying
+@end titlepage
+
+@c Output the table of contents at the beginning.
+@contents
+
+@ifnottex
+@node Top
+@top How To Build Toolchain
+
+@insertcopying
+@end ifnottex
+
+@node Preface
+@unnumbered Preface
+This manual provides a step-by-step guide to help you build
+@samp{GNU Tools for ARM Embedded Processors} on a newly installed
+Ubuntu 8.10 operating system.  But some of the steps can be ignored,
+@itemize @bullet
+@item
+If you don't want to build the package running on windows,
+please ignore @ref{Install MinGW and InstallJammer}.
+@item
+It is possible to have the package built successfully if you skip
+@ref{Build new native gcc}, but we suggest you not skip the step.
+@end itemize
+
+@noindent
+Note that the steps below may most likely also work on an Ubuntu which is
+not newly installed or version other than 8.10, but it is not guaranteed.
+In this case please go through @ref{Known Issues} before you go, and
+you need to solve any other problems you may encounter by yourself.  We
+highly appreciate if you could share the problems and solutions with us.
+
+@node Ubuntu
+@chapter Build GNU Tools on Ubuntu 8.10
+
+@node Install Ubuntu
+@section Install Ubuntu
+@c Use '@/' to allow break inside a URL
+Ubuntu 8.10 ISO image is available from
+@uref{http://old-releases.ubuntu.com@//releases@//8.10@//ubuntu-8.10-desktop-i386.iso}.
+You can install it as a native system or a virtual machine.
+The command lines provided in this document are all using
+user id @samp{build} as an example, so please create a new user
+called @samp{build} in the system.  Otherwise, you have to replace
+user id @samp{build} with your own one.
+
+@node Tune environment and install required softwares
+@section Tune environment and install required softwares
+
+@node Change /bin/sh to bash
+@subsection Change /bin/sh to bash
+Some shell scripts in gcc and other packages are incompatible with
+the dash shell, which is the default /bin/sh for Ubuntu 8.10.  You
+must make /bin/sh a symbolic link to one of the supported shells:
+saying bash.  Here on Ubuntu 8.10 system, this can be done by running
+following command firstly:
+@smallexample
+$ sudo dpkg-reconfigure -plow dash
+@end smallexample
+
+@noindent
+Then choose @samp{No} in the @samp{Configuring dash} popup dialog and
+press enter.  You can run following command and check that /bin/sh
+points to @samp{bash}:
+@smallexample
+$ ls -l /bin/sh
+...... /bin/sh -> bash
+@end smallexample
+
+@page
+@node Change software sources to Main server
+@subsection Change software sources to Main server
+On Ubuntu 8.10 system, click @samp{System->Administration->Software Sources}
+to open @samp{Software Sources} dialog, choose @samp{Main server}
+in @samp{Download from:} list box, then click @samp{close}.  You will be
+prompted by a window saying
+@samp{The information about available software is out-of-date}, please click
+@samp{Reload}.  And then there will be a warning message box popped up, which
+can be just ignored by clicking @samp{Close}.
+
+@center @image{ubuntu-software-source,,,,.png}
+
+@noindent
+Edit the file using command line:
+
+@smallexample
+$ sudo vi /etc/apt/sources.list
+@end smallexample
+
+@noindent
+replace all @samp{http://*.ubuntu.com} with
+@samp{http://old-releases.ubuntu.com} in that file, save and exit.
+Run following command to update package list.
+It should not fail, or else something has been wrong.
+
+@smallexample
+$ sudo apt-get update
+@end smallexample
+
+@page
+@node Install common tools and libraries
+@subsection Install common tools and libraries
+Install common tools and libraries needed by build process with below command:
+
+@smallexample
+@group
+$ sudo apt-get install apt-src \
+gawk \
+gzip \
+perl \
+autoconf \
+m4 \
+automake \
+libtool \
+libncurses5-dev \
+gettext \
+gperf \
+dejagnu \
+expect \
+tcl \
+autogen \
+guile-1.6 \
+flex \
+flip \
+bison \
+tofrodos \
+texinfo \
+g++ \
+gcc-multilib \
+mingw32 \
+mingw32-binutils \
+mingw32-runtime \
+libgmp3-dev \
+libmpfr-dev \
+debhelper \
+texlive \
+texlive-extra-utils
+@end group
+@end smallexample
+
+@noindent
+Note that the package management software might complain that several packages
+cannot be installed properly while installing texlive and texlive-extra-utils.
+It won't harm our building process, please just ignore it now.  Some of those
+tools might be unnecessary, but it won't hurt if installed.
+
+@node Install MinGW and InstallJammer
+@subsection Install MinGW and InstallJammer
+If you don't want to build package running on windows, please skip this step.
+
+@node Download mingw32 and related
+@subsubsection Download mingw32 and related
+Mingw32 source and patch can be downloaded from following links:
+
+@table @code
+@item * mingw32_4.2.1.dfsg-2ubuntu1.diff.gz
+@uref{https://launchpad.net/ubuntu/maverick/+source/mingw32@//4.2.1.dfsg-2ubuntu1/+files@//mingw32_4.2.1.dfsg-2ubuntu1.diff.gz}
+@item * mingw32_4.2.1.dfsg.orig.tar.gz
+@uref{https://answers.launchpad.net/ubuntu/+archive/primary@//+files/mingw32_4.2.1.dfsg.orig.tar.gz}
+@item * mingw32_4.2.1.dfsg-2ubuntu1.dsc
+@uref{https://answers.launchpad.net@//ubuntu/+archive/primary@//+files/mingw32_4.2.1.dfsg-2ubuntu1.dsc}
+@end table
+
+@noindent
+Save these files in @samp{~/tools/mingw32/} directory.  Download the mingw32-binutils source and patch from following links:
+
+@table @code
+@item * mingw32-binutils_2.20-0.1.diff.gz
+@uref{https://launchpad.net/ubuntu@//+archive/primary/+files@//mingw32-binutils_2.20-0.1.diff.gz}
+@item * mingw32-binutils_2.20-0.1.dsc 
+@uref{https://launchpad.net/ubuntu@//+archive/primary/+files@//mingw32-binutils_2.20-0.1.dsc}
+@item * mingw32-binutils_2.20.orig.tar.gz
+@uref{https://launchpad.net/ubuntu@//+archive@//primary/+files@//mingw32-binutils_2.20.orig.tar.gz}
+@end table
+
+@noindent
+Save these files in @samp{~/tools/mingw32-binutils/} directory.
+Download the mingw32-runtime source and patch from following links:
+
+@table @code
+@item * mingw32-runtime_3.15.2-0ubuntu1.diff.gz
+@uref{https://launchpad.net@//ubuntu@//+archive/primary/+files@//mingw32-runtime_3.15.2-0ubuntu1.diff.gz}
+@item * mingw32-runtime_3.15.2-0ubuntu1.dsc
+@uref{https://launchpad.net@//ubuntu/+archive@//primary/+files@//mingw32-runtime_3.15.2-0ubuntu1.dsc}
+@item * mingw32-runtime_3.15.2.orig.tar.gz
+@uref{https://launchpad.net@//ubuntu/+archive@//primary/+files@//mingw32-runtime_3.15.2.orig.tar.gz}
+@end table
+
+@noindent
+Save these files in @samp{~/tools/mingw32-runtime/} directory.
+
+@quotation Note
+In this step, the @samp{*.diff.gz} files are compressed patch files.
+But if you download these packages using internet explorer
+(such as IE, FireFox, etc.), it might automatically help you unzip
+these files.  Please check the downloaded files using following
+commands:
+
+@smallexample
+#Here using mingw32_4.2.1.dfsg-2ubuntu1.diff.gz as an example,
+#the same story stands for all *.diff.gz files
+
+$ cd ~/tools/mingw32/
+$ file mingw32_4.2.1.dfsg-2ubuntu1.diff.gz
+mingw32_4.2.1.dfsg-2ubuntu1.diff.gz: ASCII English text
+@end smallexample
+
+It says that @samp{mingw32_4.2.1.dfsg-2ubuntu1.diff.gz} is an ASCII
+text file, though file name has @samp{gz} suffix.  In this case,
+you could choose either following methods:
+
+@itemize @bullet
+@item Download the packages using "wget" command;
+@item Execute following commands to prepare the diff file:
+
+@smallexample
+$ cd ~/tools/mingw32/
+$ mv mingw32_4.2.1.dfsg-2ubuntu1.diff.gz mingw32_4.2.1.dfsg-2ubuntu1.diff
+@end smallexample
+Using this method, there is no need to unzip @samp{*.diff.gz}
+in the next step.
+@end itemize
+@end quotation
+
+@node Update/Build/Install mingw32 and related
+@subsubsection Update/Build/Install mingw32 and related
+Run the following commands to update mingw32 package
+
+@smallexample
+$ cd ~/tools/mingw32/
+$ ls
+mingw32_4.2.1.dfsg-2ubuntu1.diff.gz mingw32_4.2.1.dfsg.orig.tar.gz
+mingw32_4.2.1.dfsg-2ubuntu1.dsc
+$ tar xzf mingw32_4.2.1.dfsg.orig.tar.gz
+$ gzip -d mingw32_4.2.1.dfsg-2ubuntu1.diff.gz
+$ mv mingw32-4.2.1.dfsg.orig  mingw32-4.2.1.dfsg
+$ cd mingw32-4.2.1.dfsg
+$ patch -p1 <../mingw32_4.2.1.dfsg-2ubuntu1.diff
+$ chmod a+x ./debian/rules
+$ sudo dpkg-buildpackage
+@end smallexample
+
+@noindent
+Everything should be ok and debian package @*
+@samp{mingw32_4.2.1.dfsg-2ubuntu1_i386.deb} should be generated in
+@samp{~/mingw32/} directory.
+
+@noindent
+Install the generated package:
+
+@smallexample
+$ cd ~/tools/mingw32/
+$ sudo dpkg -i mingw32_4.2.1.dfsg-2ubuntu1_i386.deb
+@end smallexample
+
+@noindent
+Run the following commands to update mingw32-binutils package:
+
+@smallexample
+$ cd ~/tools/mingw32-binutils/
+$ ls
+mingw32-binutils_2.20-0.1.diff.gz  mingw32-binutils_2.20-0.1.dsc
+mingw32-binutils_2.20.orig.tar.gz
+$ tar xzf mingw32-binutils_2.20.orig.tar.gz
+$ gzip -d mingw32-binutils_2.20-0.1.diff.gz
+$ cd mingw32-binutils-2.20
+$ patch -p1 <../mingw32-binutils_2.20-0.1.diff
+$ chmod a+x ./debian/rules
+$ sudo dpkg-buildpackage
+@end smallexample
+
+@noindent
+Install the generated package:
+
+
+@smallexample
+$ cd ~/tools/mingw32-binutils/
+$ sudo dpkg -i mingw32-binutils_2.20-0.1_i386.deb
+@end smallexample
+
+@noindent
+Run the following commands to update mingw32-runtime package:
+@smallexample
+$ cd ~/tools/mingw32-runtime/
+$ ls
+mingw32-runtime_3.15.2-0ubuntu1.diff.gz
+mingw32-runtime_3.15.2-0ubuntu1.dsc
+mingw32-runtime_3.15.2.orig.tar.gz
+$ tar xzf mingw32-runtime_3.15.2.orig.tar.gz
+$ gzip -d mingw32-runtime_3.15.2-0ubuntu1.diff.gz
+$ cd mingw32-runtime-3.15
+$ patch -p1 <../mingw32-runtime_3.15.2-0ubuntu1.diff
+$ chmod a+x ./debian/rules
+$ sudo dpkg-buildpackage
+@end smallexample
+
+@noindent
+Install the generated package:
+
+@smallexample
+$ cd ~/tools/mingw32-runtime/
+$ sudo dpkg -i mingw32-runtime_3.15.2-0ubuntu1_all.deb
+@end smallexample
+
+@node Install InstallJammer
+@section Install InstallJammer
+Download latest InstallJammer installer (installjammer-1.2.15.tar.gz)
+from website: @uref{http://www.installjammer.com/}.  Save it in
+@samp{~/tools} directory, unpack it by running following command:
+
+@smallexample
+$ cd ~/tools
+$ tar xzf installjammer-1.2.15.tar.gz
+@end smallexample
+
+@noindent
+After unpacking, find the executable program named installjammer
+in the destination directory, for example @samp{~/tools/installjammer}.
+Export the path in PATH environment variable by appending following
+lines at the end of @samp{~/.bashrc} file:
+
+@smallexample
+#For example, $YOUR_INSTALLJAMMER_PATH=/home/build/tools/installjammer
+export PATH=$YOUR_INSTALLJAMMER_PATH:$PATH
+@end smallexample
+
+@noindent
+Save @samp{.bashrc} and quit, then restart or re-login your system.
+Check that installjammer is in your @samp{$PATH} by running below
+command:
+
+@smallexample
+$ which installjammer
+$YOUR_INSTALLJAMMER_PATH/installjammer
+#in my system, the output would be:
+#/home/build/tools/installjammer/installjammer
+@end smallexample
+
+@node Build new native gcc
+@section Build new native gcc
+
+@quotation note
+If you don't want to build the package running on the platform which is
+different from your build machine, please skip this step.
+@end quotation
+
+@noindent
+Reconfigure and compile native gcc/g++ on Ubuntu 8.10 system.
+Gcc distributed along with Ubuntu 8.10 system supports ssp utility
+by default, which uses symbols of version @strong{GLIBC_2.8/GLIBC_2.7},
+etc.
+In glibc, resulting in programs compiled by this gcc/g++ may not be able
+to run on system with lower version glibc, like redhat5/redhat4.
+To provide greater application coverage of our toolchain, we have to
+reconfigure and compile gcc with libssp disabled.
+
+@noindent
+Download @samp{gcc-4.3.6.tar.bz2} from website and save it in
+@samp{~/tools/native-gcc/src} directory.  The website is
+@uref{ftp://ftp.gnu.org/gnu/gcc/gcc-4.3.6/gcc-4.3.6.tar.bz2}.
+
+@noindent
+Reconfigure and compile gcc with following commands:
+
+@smallexample
+@group
+$ cd ~/tools/native-gcc/src
+$ mkdir -p ~/tools/native-gcc/obj/gcc && mkdir ~/tools/native-gcc/target
+$ tar -xjf gcc-4.3.6.tar.bz2
+$ cd ../obj/gcc
+$ ../../src/gcc-4.3.6/configure  \
+--build=i686-linux-gnu  \
+--host=i686-linux-gnu  \
+--target=i686-linux-gnu  \
+--enable-languages=c,c++  \
+--enable-shared   \
+--enable-threads=posix   \
+--disable-decimal-float  \
+--disable-libffi  \
+--disable-libgomp  \
+--disable-libmudflap   \
+--disable-libssp  \
+--disable-libstdcxx-pch  \
+--disable-multilib  \
+--disable-nls   \
+--with-gnu-as  \
+--with-gnu-ld    \
+--enable-libstdcxx-debug   \
+--enable-targets=all  \
+--enable-checking=release  \
+--prefix=/home/build/tools/native-gcc/target \
+--with-host-libstdcxx="-static-libgcc -L /usr/lib/gcc/i486-linuxgnu/4.3.2/ -lstdc++ -lsupc++ -lm"
+$ make
+$ make install
+@end group
+@end smallexample
+
+@noindent
+After this, add path @samp{/home/build/tools/native-gcc/target/bin}
+into your PATH environment, make sure to use the new gcc/g++ to
+compile our arm toolchain. You can do this by appending following line
+at the end of @samp{~/.bashrc} file:
+
+@smallexample
+export PATH=/home/build/tools/native-gcc/target/bin:$PATH
+@end smallexample
+
+@noindent
+Then re-start or re-login the system.
+
+@page
+@node Build GNU Tools for ARM Embedded Processors
+@section Build GNU Tools for ARM Embedded Processors
+
+@noindent
+You have set up the building environment.  You can now build the
+toolchain by yourself with below commands:
+
+@smallexample
+@group
+#Copy the src release package into ~/toolchain/ directory
+$ cp @value{PKG_NAME}-src.tar.bz2 ~/toolchain
+#Prepare source codes
+$ cd ~/toolchain
+$ tar -xjf @value{PKG_NAME}-src.tar.bz2
+$ cd ./@value{PKG_NAME}/src
+$ find -name '*.tar.*' | xargs -I% tar -xf %
+#Since we should not modify zlib package,
+#here provides a patch to compile it successfully.
+$ cd zlib-1.2.5
+$ patch -p1 <../zlib-1.2.5.patch
+$ cd ../../
+#Start building the toolchain.
+#Can specify "--skip_mingw32" option to skip building windows host
+#toolchain, and if specify that option when building prerequisites,
+#you have to specify it when building toolchain too.
+$ ./build-prerequisites.sh [--skip_mingw32]
+$ ./build-toolchain.sh [--skip_mingw32]
+@end group
+@end smallexample
+
+@noindent
+After this, you can @samp{cd} into @*
+@samp{~/toolchain/@value{PKG_NAME}/pkg} and find 
+the built toolchain/source code packages and the md5 checksum file.
+
+
+@node Mac
+@chapter Build GNU Tools on Mac OS X
+In addition to the build on Ubuntu, the build scripts in same source
+package can also be used on Mac OS X to natively build a tool chain
+whose host is Mac OS X and target is arm-none-eabi.  In this step we
+will describe how to install required software components and how to
+execute the build scripts.  After this step you should be able to
+generate a same tool chain with the one released.  Due to resource
+limit, this build process is only tested against Mac OS X 10.7.3 along
+with components listed below.
+
+@node Prepare a Mac OS X environment
+@section Prepare a Mac OS X environment
+The hardware should be an x86-based Mac machine like iMac. The installed
+OS should be Mac OS X which is updated to 10.7.3.  The way to find out
+the Mac OS X version information is to click the @strong{Apple} menu and
+choose @strong{About This Mac}.
+
+@sp 1
+@center @image{click-apple-menu,,,,.png}
+
+@page
+@noindent
+For the environment we are using, it looks as below:
+
+@sp 1
+@center @image{about-this-mac,,,,.png}
+
+@node Install the Command Line Tools for Xcode
+@section Install the Command Line Tools for Xcode
+This component is originally part of Apple Xcode but can be installed
+separately without Xcode.  It can be freely obtained from Apple official
+website @uref{https://developer.apple.com@//downloads/index.action}.
+A valid Apple ID is required to login and download.  The one we are using
+is in the item named @samp{Command Line Tools for Xcode - June 2012}.
+After finish the download, just double click the @samp{.dmg} file and
+follow the instructions to install it.
+
+@node Set up the brew to install other required components
+@section Set up the brew to install other required components
+In order to handle GNU configure and build system, we have to install some
+components like automake/autoconf through brew which can be easily set up
+from its official website known as Homebrew.
+After set up the brew, use below commands to install required components:
+
+@smallexample
+brew install automake autoconf libtool coreutils gnu-tar md5sha1sum
+@end smallexample
+
+@node Install MacTeX to build PDF format documents
+@section Install MacTeX to build PDF format documents
+This is an optional step and can be skipped if PDF format documents aren't
+needed.  The build process will use TeX engineer provided by MacTeX-2012 to
+generate PDF format documents.  This component can be freely obtained from
+its official website @uref{http://www.tug.org/mactex/2012/}.  Its original
+size is approximately 2.1G.  After download, just double click the
+@samp{MacTeX.pkg} file and follow the instructions to install it.  By default
+the related TeX executable files won't be installed into default path like
+@samp{/usr/bin}, so we need restart the Terminal before we run the build
+scripts.
+
+@node Build the tool chain under Mac OS X
+@section Build the tool chain under Mac OS X
+With all the dependent packages installed, we can start to natively
+build tool chain on Mac OS.  Following are commands and steps we are
+using:
+
+@smallexample
+
+#Copy the src release package into ~/mac-build/ directory
+$ cp @value{PKG_NAME}-src.tar.bz2 ~/mac-build
+
+#Prepare source codes
+$ cd ~/mac-build
+$ tar xjf @value{PKG_NAME}-src.tar.bz2
+$ cd ./@value{PKG_NAME}/src
+$ find . -name '*.tar.*' | xargs -I% tar -xf %
+
+#Since we should not modify zlib package,
+#here provides a patch to compile it successfully.
+$ cd zlib-1.2.5
+$ patch -p1 <../zlib-1.2.5.patch
+$ cd ../../
+
+#Start building the toolchain.
+$ ./build-prerequisites.sh
+$ ./build-toolchain.sh
+
+@end smallexample
+
+
+@appendix Known Issues
+
+@itemize @bullet
+@item
+This document and build scripts sometimes have problem when running on
+ubuntu 9.10 due to bug in @samp{tar-1.22-1} package.  You can update
+@samp{tar} to higher version.  For more information, please refer to
+@uref{https://bugs.launchpad.net@//ubuntu/+source@//tar/+bug/453330}.
+@item
+Due to binutils bug 13036, native gcc with version higher than 4.5.1
+won't build binutils successfully.  You should note this issue when
+trying to build the cross-toolchain in your specific host environment.
+For more information, please refer to 
+@uref{http://sourceware.org/bugzilla/show_bug.cgi?id=13036}.
+@item
+On system other than Ubuntu 8.10, you should change the directory
+@samp{/usr/lib/gcc/i486-linuxgnu/4.3.2/} in @ref{Build new native gcc}
+to the directory conaining @samp{libstdc++.a} on your build system.
+@end itemize
+
+@bye

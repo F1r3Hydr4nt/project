@@ -1,0 +1,6 @@
+2013-08-06  Bin Cheng <bin.cheng@arm.com>
+
+	* libnosys/sbrk.c (_sbrk): Detect short of memory for arm.
+	(stack_ptr): New global register var.
+	(errno): undefine macro and add new declaration.
+

@@ -1,0 +1,43 @@
+# First, create the ~/bin directory if it doesn't exist
+mkdir -p ~/bin
+
+# Create the as-wrapper script
+cat > ~/bin/as-wrapper << 'EOF'
+#!/bin/bash
+# Check if we're trying to process a .h file or C header file
+if [[ "$*" == *".h"* ]] || [[ "$*" == *"/bits/"* ]]; then
+    echo "Skipping assembler call for C header: $*"
+    exit 0
+else
+    # Pass through to the real assembler
+    exec /usr/bin/as "$@"
+fi
+EOF
+
+# Make it executable
+chmod +x ~/bin/as-wrapper
+
+# Create the gcc-wrapper script
+cat > ~/bin/gcc-wrapper << 'EOF'
+#!/bin/bash
+if [[ "$*" == *"-c"* ]]; then
+    # Modify any -Wa,... options to use our as-wrapper
+    modified_args=()
+    for arg in "$@"; do
+        if [[ "$arg" == "-Wa,"* ]]; then
+            modified_args+=("${arg/-Wa,/-Wa,$(pwd)/bin/as-wrapper }")
+        else
+            modified_args+=("$arg")
+        fi
+    done
+    exec /usr/bin/gcc "${modified_args[@]}"
+else
+    exec /usr/bin/gcc "$@"
+fi
+EOF
+
+# Make it executable
+chmod +x ~/bin/gcc-wrapper
+
+# Add ~/bin to the PATH environment variable
+export PATH=$HOME/bin:$PATH

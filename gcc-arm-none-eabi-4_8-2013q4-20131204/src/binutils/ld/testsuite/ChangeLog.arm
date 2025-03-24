@@ -1,0 +1,20 @@
+2013-07-30  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline
+	2013-07-18  Terry Guo  <terry.guo@arm.com>
+
+	* ld-arm/thumb-b-lks-sym.d: Updated to be more flexible.
+	* ld-arm/thumb-bl-lks-sym.d: Likewise.
+
+2013-07-30  Terry Guo  <terry.guo@arm.com>
+
+	Backport from mainline
+	2013-06-13  Terry Guo  <terry.guo@arm.com>
+
+	PR ld/15302
+	* ld-arm/branch-lks-sym.ld: New script.
+	* ld-arm/thumb-b-lks-sym.s: New test.
+	* ld-arm/thumb-b-lks-sym.d: Expected disassembly.
+	* ld-arm/thumb-bl-lks-sym.s: New test.
+	* ld-arm/thumb-bl-lks-sym.d: Expected disassembly.
+	* ld-arm/arm-elf.exp: Run the new tests.
